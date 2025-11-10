@@ -2,7 +2,7 @@
 
 module Sidekiqable
   class Worker
-    include Sidekiq::Worker
+    include Sidekiq::Job
 
     def perform(callable, *args)
       class_name, method_name = callable.split(".", 2)

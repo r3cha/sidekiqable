@@ -42,7 +42,6 @@ module Sidekiqable
       global_options = Sidekiqable.configuration.sidekiq_options
       class_options = @target_class.respond_to?(:sidekiqable_options) ? @target_class.sidekiqable_options : {}
 
-      # Merge global and per-class options (class options take precedence)
       options = global_options.merge(class_options)
 
       options.empty? ? worker_class : worker_class.set(options)
