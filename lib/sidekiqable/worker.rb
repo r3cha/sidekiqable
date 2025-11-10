@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 module Sidekiqable
-  class GenericMethodWorker
+  class Worker
     include Sidekiq::Worker
 
-    def perform(class_name, method_name, *args)
+    def perform(callable, *args)
+      class_name, method_name = callable.split(".", 2)
       klass = constantize!(class_name)
       klass.public_send(method_name, *args)
     end
@@ -16,5 +19,3 @@ module Sidekiqable
     end
   end
 end
-
-

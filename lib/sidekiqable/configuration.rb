@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Sidekiqable
   class Configuration
     attr_accessor :queue
@@ -24,5 +26,3 @@ module Sidekiqable
     end
   end
 end
-
-

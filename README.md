@@ -1,6 +1,6 @@
 # Sidekiqable
 
-Sidekiqable lets you enqueue any class method or modules asynchronously without writing dedicated Sidekiq workers or ActiveJob wrappers. Chain `perform_async`, `perform_in`, or `perform_at` directly off a class method invocation and Sidekiqable will serialize the call into a generic worker.
+Sidekiqable lets you enqueue any class method or modules asynchronously without writing dedicated Sidekiq workers or ActiveJob wrappers. Prefix method calls with `perform_async`, `perform_in`, or `perform_at` and Sidekiqable will serialize the call into a generic worker.
 
 ```ruby
 class ReportMailer
@@ -11,11 +11,11 @@ class ReportMailer
   end
 end
 
-ReportMailer.deliver_daily(42).perform_async
-ReportMailer.deliver_daily(42).perform_in(5.minutes)
+ReportMailer.perform_async.deliver_daily(42)
+ReportMailer.perform_in(5.minutes).deliver_daily(42)
 ```
 
-The scheduled job will execute `ReportMailer.deliver_daily(42)` later via `Sidekiqable::GenericMethodWorker`.
+The scheduled job will execute `ReportMailer.deliver_daily(42)` later via `Sidekiqable::Worker`.
 
 ## Installation
 
@@ -38,7 +38,7 @@ When used in a Rails application the included Railtie automatically loads Sideki
 ## Usage
 
 1. Add `Sidekiqable::AsyncableMethods` to any class whose class methods you want to schedule.
-2. Call the method normally and then chain the desired Sidekiq scheduling helper.
+2. Prefix method calls with the desired Sidekiq scheduling helper (`perform_async`, `perform_in`, or `perform_at`).
 
 ```ruby
 class Foo
@@ -50,23 +50,23 @@ class Foo
 end
 
 # Immediately enqueue
-Foo.boo(1, 2).perform_async
+Foo.perform_async.boo(1, 2)
 
 # Schedule relative to now
-Foo.boo(1, 2).perform_in(5.minutes)
+Foo.perform_in(5.minutes).boo(1, 2)
 
 # Schedule at a specific time
-Foo.boo(1, 2).perform_at(1.day.from_now)
+Foo.perform_at(1.day.from_now).boo(1, 2)
 ```
 
-Jobs are enqueued with the payload `["Foo", "boo", 1, 2]` and executed by `Sidekiqable::GenericMethodWorker`, which constantizes the class and invokes the method.
+Jobs are enqueued with the payload `["Foo.boo", 1, 2]` and executed by `Sidekiqable::Worker`, which constantizes the class and invokes the method.
 
 ### Synchronous execution
 
-If you call any other method on the proxy (or explicitly call `#call`, `#result`, or `#value`) the underlying method executes immediately and the return value is proxied back.
+Normal method calls execute immediately without any async behavior.
 
 ```ruby
-Foo.boo(1, 2).call # => executes synchronously and returns the original value
+Foo.boo(1, 2) # => executes synchronously and returns the original value
 ```
 
 ### Configuration
@@ -88,7 +88,7 @@ config.sidekiqable.queue = "low"
 config.sidekiqable.retry = false
 ```
 
-These values are applied to every job dispatched through `Sidekiqable::GenericMethodWorker` (and can still be overridden per job with Sidekiq’s standard `set` API if needed).
+These values are applied to every job dispatched through `Sidekiqable::Worker` (and can still be overridden per job with Sidekiq's standard `set` API if needed).
 
 ### Argument safety
 

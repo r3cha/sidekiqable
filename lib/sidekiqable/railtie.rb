@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_support/ordered_options"
 require "rails/railtie"
 
@@ -15,5 +17,3 @@ module Sidekiqable
     end
   end
 end
-
-
