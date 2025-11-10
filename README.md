@@ -7,7 +7,7 @@ class ReportMailer
   extend Sidekiqable::AsyncableMethods
 
   def self.deliver_daily(user_id)
-    UserMailer.daily_report(user_id).deliver_now
+    # ...
   end
 end
 
