@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Sidekiqable
   VERSION = "0.0.1"
 end
