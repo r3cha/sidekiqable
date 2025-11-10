@@ -1,6 +1,6 @@
 # Sidekiqable
 
-Sidekiqable lets you enqueue any class method or modules asynchronously without writing dedicated Sidekiq workers or ActiveJob wrappers. Prefix method calls with `perform_async`, `perform_in`, or `perform_at` and Sidekiqable will serialize the call into a generic worker.
+Sidekiqable lets you enqueue any class method or modules function asynchronously without writing dedicated Sidekiq workers or ActiveJob wrappers. Prefix method calls with `perform_async`, `perform_in`, or `perform_at` and Sidekiqable will serialize the call into a generic worker.
 
 ```ruby
 class ReportMailer
