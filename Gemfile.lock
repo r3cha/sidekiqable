@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sidekiqable (0.0.1)
+    sidekiqable (0.0.2)
       sidekiq (>= 6.0)
 
 GEM
