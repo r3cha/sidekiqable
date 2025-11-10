@@ -11,23 +11,17 @@ module Sidekiqable
     def method_missing(method_name, *args, &block)
       raise Sidekiqable::Error, "Cannot enqueue blocks to Sidekiq" if block
 
-      validate_serializable!(method_name, args)
+      super unless %i[perform_async perform_in perform_at].include?(@mode)
+
+      validate_serializable!(method_name, args) if Sidekiqable.configuration.validate_arguments
 
       worker_class = Sidekiqable::Worker
       worker = apply_config(worker_class)
 
-      # Compact payload: "ClassName.method_name" instead of separate args
       callable = "#{@target_class.name}.#{method_name}"
       payload = [callable, *args]
 
-      case @mode
-      when :perform_async
-        worker.perform_async(*payload)
-      when :perform_in
-        worker.perform_in(@schedule_arg, *payload)
-      when :perform_at
-        worker.perform_at(@schedule_arg, *payload)
-      end
+      worker.send(@mode, *payload)
     end
 
     def respond_to_missing?(method_name, include_private = false)
@@ -45,7 +39,12 @@ module Sidekiqable
     end
 
     def apply_config(worker_class)
-      options = Sidekiqable.configuration.sidekiq_options
+      global_options = Sidekiqable.configuration.sidekiq_options
+      class_options = @target_class.respond_to?(:sidekiqable_options) ? @target_class.sidekiqable_options : {}
+
+      # Merge global and per-class options (class options take precedence)
+      options = global_options.merge(class_options)
+
       options.empty? ? worker_class : worker_class.set(options)
     end
   end
