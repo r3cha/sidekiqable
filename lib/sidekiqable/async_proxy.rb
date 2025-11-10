@@ -21,7 +21,14 @@ module Sidekiqable
       callable = "#{@target_class.name}.#{method_name}"
       payload = [callable, *args]
 
-      worker.send(@mode, *payload)
+      case @mode
+      when :perform_async
+        worker.perform_async(*payload)
+      when :perform_in
+        worker.perform_in(@schedule_arg, *payload)
+      when :perform_at
+        worker.perform_at(@schedule_arg, *payload)
+      end
     end
 
     def respond_to_missing?(method_name, include_private = false)
